@@ -1,6 +1,10 @@
+using System;
 using System.Text;
 using Empty;
+using Empty.Datas;
+using Empty.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +35,16 @@ builder.Services.AddAuthentication(x =>
         ValidateIssuer = false,
         ValidateAudience = false
     };
+});
+
+builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Host.ConfigureServices((hostContext, services) =>
+{
+    services.AddDbContext<XaPhuongContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+    services.AddScoped<XaPhuongService>();
 });
 
 var app = builder.Build();

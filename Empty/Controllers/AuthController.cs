@@ -32,7 +32,7 @@ namespace Empty.Controllers
 
             if (!match)
             {
-                return BadRequest("Invalid Password");
+                return BadRequest("Invalid Password or Username");
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
