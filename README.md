@@ -26,14 +26,24 @@ Yêu cầu cụ thể:
 - System.IdentityModel.Tokens.Jwt
 
 ## Database
-
+XaPhuongs
 ```
         public int Id { get; set; }
         public string? Name { get; set; }
         public int Population { get; set; }
         public int Area { get; set; }
 ```
-
+Users
+```
+        [Required]
+        public string? UserName { get; set; }
+        [Required]
+        public string? Role { get; set; }
+        [Required]
+        public byte[]? PasswordSalt { get; set; }
+        [Required]
+        public byte[]? PasswordHash { get; set; }
+```
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first
