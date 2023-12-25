@@ -44,8 +44,7 @@ builder.Host.ConfigureServices((hostContext, services) =>
     services.AddDbContext<XaPhuongContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
     services.AddDbContext<UserContext>(options =>
-           options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
     services.AddScoped<XaPhuongService>();
 });
 

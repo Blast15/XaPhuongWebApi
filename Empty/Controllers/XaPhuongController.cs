@@ -18,6 +18,7 @@ namespace Empty.Controllers
             _xaPhuongService = xaPhuongService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
