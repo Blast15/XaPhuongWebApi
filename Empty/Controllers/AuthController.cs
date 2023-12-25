@@ -6,25 +6,27 @@ using Empty.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-
+using Microsoft.EntityFrameworkCore;
+using Empty.Datas;
 namespace Empty.Controllers
 {
     public class AuthController : Controller
     {
-        private static List<User> UserList = new List<User>();
         private readonly AppSettings _applicationSettings;
+        private readonly UserContext _context;
 
-        public AuthController(IOptions<AppSettings> appSettings)
+        public AuthController(IOptions<AppSettings> appSettings, UserContext context)
         {
             this._applicationSettings = appSettings.Value;
+            this._context = context;
         }
 
 
         [HttpPost("Login")]
-        public IActionResult Login([FromBody] Login model)
+        public async Task<IActionResult> Login([FromBody] Login model)
         {
-            var user = UserList.Where(x => x.UserName == model.UserName).FirstOrDefault();
-            if(user == null)
+            var user = await _context.Users.Where(x => x.UserName == model.UserName).FirstOrDefaultAsync();
+            if (user == null)
             {
                 return BadRequest("Invalid Username");
             }
@@ -45,12 +47,12 @@ namespace Empty.Controllers
                     new Claim(ClaimTypes.Role, user.Role)
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),SecurityAlgorithms.HmacSha512Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var encryptedToken = tokenHandler.WriteToken(token);
 
-            return Ok(new { token = encryptedToken, username = user.UserName});
+            return Ok(new { token = encryptedToken, username = user.UserName });
 
         }
 
@@ -68,26 +70,28 @@ namespace Empty.Controllers
 
 
         [HttpPost("Register")]
-        public IActionResult Register([FromBody] Register model)
+        public async Task<IActionResult> Register([FromBody] Register model)
         {
             var user = new User
             {
                 UserName = model.UserName,
                 Role = model.Role
             };
-            if(model.ConfirmPassword == model.Password)
+            if (model.ConfirmPassword == model.Password)
             {
                 using (HMACSHA512? hmac = new HMACSHA512())
                 {
                     user.PasswordSalt = hmac.Key;
                     user.PasswordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(model.Password));
                 }
-            } else
+            }
+            else
             {
                 return BadRequest("Passwords do not match");
             }
 
-            UserList.Add(user);
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
             return Ok(user);
         }
